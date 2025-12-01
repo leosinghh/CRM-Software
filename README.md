@@ -11,7 +11,6 @@ Negotiation messenger with templates for influencers to ask for better rates.
 - **Live campaign tracker:** ROI, spend, revenue, and conversions across collaborations.
 - **Automatic contract builder:** fast clauses for usage rights, deliverables, timelines, payment terms.
 - **Negotiation messenger:** insert ready-made templates, set target rate, copy/send.
-- **AI pricing benchmark:** niche + geo-aware rate suggestion based on followers and engagement.
 - **Shared workspace:** deadlines, owners, and status chips for both brand and creator.
 - **Auto-invoice & payouts:** snapshot of invoice status and amounts.
 
