@@ -8,7 +8,12 @@
 </head>
 <body>
   <header class="topbar">
-    <div class="logo">InfluenceFlow CRM</div>
+    <div>
+      <div class="logo">InfluenceFlow CRM</div>
+      <div class="tagline">
+        HubSpot × AspireIQ × Notion — simplified for brands and creators
+      </div>
+    </div>
     <nav class="nav-links">
       <button class="nav-link active" data-section="pipeline">Pipeline</button>
       <button class="nav-link" data-section="contracts">Contracts</button>
@@ -17,7 +22,7 @@
   </header>
 
   <main class="page">
-    <!-- Pipeline Section -->
+    <!-- PIPELINE SECTION -->
     <section id="pipeline" class="section visible">
       <div class="section-header">
         <h1>Campaign Pipeline</h1>
@@ -175,7 +180,7 @@
       </div>
     </section>
 
-    <!-- Contracts Section -->
+    <!-- CONTRACTS SECTION -->
     <section id="contracts" class="section">
       <div class="section-header">
         <h1>Contract Builder</h1>
@@ -264,13 +269,17 @@
               Copy to clipboard
             </button>
           </div>
-          <textarea id="contract-output" class="contract-output" rows="22" readonly>
-Fill in the form on the left and click "Build contract" to generate a full contract.</textarea>
+          <textarea
+            id="contract-output"
+            class="contract-output"
+            rows="22"
+            readonly
+          >Fill in the form on the left and click "Build contract" to generate a full contract.</textarea>
         </div>
       </div>
     </section>
 
-    <!-- Workspace Section -->
+    <!-- WORKSPACE SECTION -->
     <section id="workspace" class="section">
       <div class="section-header">
         <h1>Shared Workspace</h1>
@@ -307,6 +316,10 @@ Fill in the form on the left and click "Build contract" to generate a full contr
       </p>
     </section>
   </main>
+
+  <footer class="footer">
+    Built for mid-sized creators, marketing teams, and agencies tired of spreadsheets.
+  </footer>
 
   <script src="main.js"></script>
 </body>
