@@ -2,127 +2,311 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <title>InfluenceFlow CRM Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>InfluenceFlow CRM</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header class="top-bar">
-    <div class="brand">InfluenceFlow CRM</div>
-    <div class="tagline">HubSpot × AspireIQ × Notion — simplified for brands and creators</div>
+  <header class="topbar">
+    <div class="logo">InfluenceFlow CRM</div>
+    <nav class="nav-links">
+      <button class="nav-link active" data-section="pipeline">Pipeline</button>
+      <button class="nav-link" data-section="contracts">Contracts</button>
+      <button class="nav-link" data-section="workspace">Workspace</button>
+    </nav>
   </header>
 
-  <main class="layout">
-    <section class="panel kpis">
-      <h2>Live Performance</h2>
-      <div class="kpi-grid" id="kpiGrid"></div>
-    </section>
-
-    <section class="panel">
-      <div class="panel-header">
-        <h2>Campaign Tracker (ROI per collaboration)</h2>
-        <button id="refreshCampaigns" class="ghost">Refresh</button>
+  <main class="page">
+    <!-- Pipeline Section -->
+    <section id="pipeline" class="section visible">
+      <div class="section-header">
+        <h1>Campaign Pipeline</h1>
+        <p>Track live collaborations, performance, and revenue in one place.</p>
       </div>
-      <div class="table" id="campaignTable"></div>
-    </section>
 
-    <section class="panel two-column">
-      <div class="column">
-        <h2>Automatic Contract Builder</h2>
-        <form id="contractForm" class="form">
-          <label>
-            Usage Rights
-            <input type="text" name="usage" placeholder="6 months paid social + whitelisting" required />
-          </label>
-          <label>
-            Deliverables
-            <textarea name="deliverables" rows="3" placeholder="2x TikTok (30s), 3x IG Story with swipe up" required></textarea>
-          </label>
-          <div class="row">
-            <label class="flex">
-              Start Date
-              <input type="date" name="startDate" required />
-            </label>
-            <label class="flex">
-              Due Date
-              <input type="date" name="dueDate" required />
-            </label>
-          </div>
-          <label>
-            Brand/Influencer Contact
-            <input type="text" name="contact" placeholder="Acme Brand x @creator" required />
-          </label>
-          <button type="submit">Generate Contract</button>
-        </form>
-        <pre id="contractOutput" class="output" aria-live="polite"></pre>
+      <div class="grid-3">
+        <div class="card kpi-card">
+          <h3>Total Spend</h3>
+          <p class="kpi-value" id="kpi-spend">$0</p>
+        </div>
+        <div class="card kpi-card">
+          <h3>Total Revenue</h3>
+          <p class="kpi-value" id="kpi-revenue">$0</p>
+        </div>
+        <div class="card kpi-card">
+          <h3>Overall ROI</h3>
+          <p class="kpi-value" id="kpi-roi">0%</p>
+        </div>
       </div>
-      <div class="column">
-        <h2>Negotiation Messenger</h2>
-        <div class="form">
-          <label>
-            Template
-            <select id="templateSelect"></select>
-          </label>
-          <label>
-            Target Rate ($)
-            <input type="number" id="targetRate" placeholder="e.g. 1500" />
-          </label>
-          <button id="insertTemplate">Insert Template</button>
-          <textarea id="messageBox" rows="8" placeholder="Compose your message"></textarea>
-          <div class="actions">
-            <button class="ghost" id="copyMessage">Copy</button>
-            <button>Send to Brand</button>
+
+      <div class="grid-2">
+        <!-- Deals table -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Deals</h2>
+            <div class="filters">
+              <select id="filter-status">
+                <option value="">All statuses</option>
+                <option value="Planning">Planning</option>
+                <option value="Live">Live</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+              <input
+                type="search"
+                id="filter-search"
+                placeholder="Search by brand, creator, or platform"
+              />
+            </div>
           </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Brand</th>
+                  <th>Creator</th>
+                  <th>Platform</th>
+                  <th>Status</th>
+                  <th>Spend</th>
+                  <th>Revenue</th>
+                  <th>ROI</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="deals-body">
+                <!-- rows injected by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Add / Edit deal form -->
+        <div class="card">
+          <div class="card-header">
+            <h2 id="deal-form-title">Add Deal</h2>
+          </div>
+          <form id="deal-form" class="form">
+            <input type="hidden" id="deal-id" />
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="brand">Brand *</label>
+                <input type="text" id="brand" required />
+              </div>
+              <div class="form-group">
+                <label for="creator">Creator *</label>
+                <input type="text" id="creator" required />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="platform">Platform</label>
+                <select id="platform">
+                  <option value="">Select</option>
+                  <option value="Instagram">Instagram</option>
+                  <option value="TikTok">TikTok</option>
+                  <option value="YouTube">YouTube</option>
+                  <option value="X / Twitter">X / Twitter</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="status">Status</label>
+                <select id="status">
+                  <option value="Planning">Planning</option>
+                  <option value="Live">Live</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Cancelled">Cancelled</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="start-date">Start date</label>
+                <input type="date" id="start-date" />
+              </div>
+              <div class="form-group">
+                <label for="end-date">End date</label>
+                <input type="date" id="end-date" />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="spend">Spend (USD)</label>
+                <input type="number" id="spend" min="0" step="1" />
+              </div>
+              <div class="form-group">
+                <label for="revenue">Revenue (USD)</label>
+                <input type="number" id="revenue" min="0" step="1" />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="impressions">Impressions</label>
+                <input type="number" id="impressions" min="0" step="1" />
+              </div>
+              <div class="form-group">
+                <label for="clicks">Clicks</label>
+                <input type="number" id="clicks" min="0" step="1" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="deliverables">Deliverables</label>
+              <textarea
+                id="deliverables"
+                rows="3"
+                placeholder="e.g. 2x IG Reels, 3x Stories, 1x TikTok, usage for 6 months paid social..."
+              ></textarea>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn primary">Save deal</button>
+              <button type="button" id="reset-deal-form" class="btn ghost">
+                Clear
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </section>
 
-    <section class="panel two-column">
-      <div class="column">
-        <h2>AI Pricing Benchmark</h2>
-        <form id="pricingForm" class="form">
-          <label>
-            Niche
-            <select name="niche">
-              <option value="beauty">Beauty</option>
-              <option value="fitness">Fitness</option>
-              <option value="tech">Tech & Gadgets</option>
-              <option value="food">Food</option>
-              <option value="travel">Travel</option>
-            </select>
-          </label>
-          <label>
-            Audience Country
-            <select name="country">
-              <option value="us">United States</option>
-              <option value="uk">United Kingdom</option>
-              <option value="eu">Europe (non-UK)</option>
-              <option value="latam">LATAM</option>
-              <option value="sea">SE Asia</option>
-            </select>
-          </label>
-          <label>
-            Followers (20k – 500k)
-            <input type="number" name="followers" min="20000" max="500000" step="1000" value="120000" />
-          </label>
-          <label>
-            Avg Engagement (%)
-            <input type="number" name="engagement" min="0.5" max="20" step="0.1" value="4.2" />
-          </label>
-          <button type="submit">Generate Benchmark</button>
-        </form>
-        <div id="pricingResult" class="output"></div>
+    <!-- Contracts Section -->
+    <section id="contracts" class="section">
+      <div class="section-header">
+        <h1>Contract Builder</h1>
+        <p>Generate a structured contract from deal terms. No AI—just clean templates.</p>
       </div>
-      <div class="column">
-        <h2>Shared Workspace</h2>
-        <div class="table" id="workspaceBoard"></div>
-        <h3>Auto-Invoice & Payouts</h3>
-        <div class="table" id="payoutTable"></div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h2>Inputs</h2>
+          <form id="contract-form" class="form">
+            <div class="form-group">
+              <label for="c-brand">Brand / Advertiser *</label>
+              <input type="text" id="c-brand" required />
+            </div>
+            <div class="form-group">
+              <label for="c-creator">Creator / Talent *</label>
+              <input type="text" id="c-creator" required />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="c-platform">Platform(s)</label>
+                <input
+                  type="text"
+                  id="c-platform"
+                  placeholder="Instagram, TikTok, YouTube..."
+                />
+              </div>
+              <div class="form-group">
+                <label for="c-fee">Total fee (USD)</label>
+                <input type="number" id="c-fee" min="0" step="1" />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="c-start">Campaign start</label>
+                <input type="date" id="c-start" />
+              </div>
+              <div class="form-group">
+                <label for="c-end">Campaign end</label>
+                <input type="date" id="c-end" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="c-deliverables">Deliverables *</label>
+              <textarea
+                id="c-deliverables"
+                rows="3"
+                placeholder="Number of posts, formats, deadlines..."
+                required
+              ></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="c-usage">Usage rights</label>
+              <textarea
+                id="c-usage"
+                rows="3"
+                placeholder="e.g. Paid social only, 6 months, whitelisted ads..."
+              ></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="c-payment-terms">Payment terms</label>
+              <textarea
+                id="c-payment-terms"
+                rows="2"
+                placeholder="e.g. 50% on signature, 50% within 30 days of content approval..."
+              ></textarea>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn primary">
+                Build contract
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2>Contract Output</h2>
+            <button id="contract-copy" class="btn ghost small">
+              Copy to clipboard
+            </button>
+          </div>
+          <textarea id="contract-output" class="contract-output" rows="22" readonly>
+Fill in the form on the left and click "Build contract" to generate a full contract.</textarea>
+        </div>
       </div>
     </section>
-  </main>
 
-  <footer class="footer">Built for mid-sized creators, marketing teams, and agencies tired of spreadsheets.</footer>
+    <!-- Workspace Section -->
+    <section id="workspace" class="section">
+      <div class="section-header">
+        <h1>Shared Workspace</h1>
+        <p>Lightweight task board to track drafts, reviews, and approvals.</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <h2>To do</h2>
+          <ul id="todo-list" class="task-list"></ul>
+          <form id="todo-form" class="form small">
+            <input
+              type="text"
+              id="todo-input"
+              placeholder="Add a new task..."
+              required
+            />
+            <button type="submit" class="btn small primary">Add</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2>In progress</h2>
+          <ul id="inprogress-list" class="task-list"></ul>
+        </div>
+
+        <div class="card">
+          <h2>Done</h2>
+          <ul id="done-list" class="task-list"></ul>
+        </div>
+      </div>
+      <p class="hint">
+        Drag tasks between columns to update their status. Everything is saved locally in your browser.
+      </p>
+    </section>
+  </main>
 
   <script src="main.js"></script>
 </body>
