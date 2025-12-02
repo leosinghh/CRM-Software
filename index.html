@@ -8,17 +8,22 @@
 </head>
 <body>
   <header class="topbar">
-    <div>
+    <div class="topbar-left">
       <div class="logo">InfluenceFlow CRM</div>
       <div class="tagline">
         HubSpot × AspireIQ × Notion — simplified for brands and creators
       </div>
     </div>
-    <nav class="nav-links">
-      <button class="nav-link active" data-section="pipeline">Pipeline</button>
-      <button class="nav-link" data-section="contracts">Contracts</button>
-      <button class="nav-link" data-section="workspace">Workspace</button>
-    </nav>
+    <div class="topbar-right">
+      <nav class="nav-links">
+        <button class="nav-link active" data-section="pipeline">Pipeline</button>
+        <button class="nav-link" data-section="contracts">Contracts</button>
+        <button class="nav-link" data-section="workspace">Workspace</button>
+      </nav>
+      <button id="demo-mode" class="btn small ghost">
+        Demo mode
+      </button>
+    </div>
   </header>
 
   <main class="page">
@@ -29,26 +34,49 @@
         <p>Track live collaborations, performance, and revenue in one place.</p>
       </div>
 
-      <div class="grid-3">
+      <div class="grid-3 kpi-row">
         <div class="card kpi-card">
           <h3>Total Spend</h3>
           <p class="kpi-value" id="kpi-spend">$0</p>
+          <p class="kpi-sub" id="kpi-spend-sub">0 active deals</p>
         </div>
         <div class="card kpi-card">
           <h3>Total Revenue</h3>
           <p class="kpi-value" id="kpi-revenue">$0</p>
+          <p class="kpi-sub" id="kpi-revenue-sub">0 completed deals</p>
         </div>
         <div class="card kpi-card">
           <h3>Overall ROI</h3>
           <p class="kpi-value" id="kpi-roi">0%</p>
+          <p class="kpi-sub" id="kpi-roi-sub">Top deal: —</p>
         </div>
       </div>
 
       <div class="grid-2">
-        <!-- Deals table -->
+        <!-- Deals table / board -->
         <div class="card">
           <div class="card-header">
-            <h2>Deals</h2>
+            <div class="card-header-main">
+              <h2>Deals</h2>
+              <div class="view-toggle" role="tablist">
+                <button
+                  id="view-table"
+                  class="chip-toggle active"
+                  data-view="table"
+                  role="tab"
+                >
+                  Table
+                </button>
+                <button
+                  id="view-board"
+                  class="chip-toggle"
+                  data-view="board"
+                  role="tab"
+                >
+                  Board
+                </button>
+              </div>
+            </div>
             <div class="filters">
               <select id="filter-status">
                 <option value="">All statuses</option>
@@ -64,12 +92,13 @@
               />
             </div>
           </div>
-          <div class="table-wrapper">
+
+          <!-- Table view -->
+          <div id="deals-table-wrapper" class="table-wrapper">
             <table>
               <thead>
                 <tr>
-                  <th>Brand</th>
-                  <th>Creator</th>
+                  <th>Deal</th>
                   <th>Platform</th>
                   <th>Status</th>
                   <th>Spend</th>
@@ -83,27 +112,37 @@
               </tbody>
             </table>
           </div>
+
+          <!-- Board view -->
+          <div id="deals-board" class="deals-board hidden">
+            <!-- columns injected by JS -->
+          </div>
         </div>
 
         <!-- Add / Edit deal form -->
         <div class="card">
           <div class="card-header">
             <h2 id="deal-form-title">Add Deal</h2>
+            <span class="card-caption">Parties, economics, and performance</span>
           </div>
           <form id="deal-form" class="form">
             <input type="hidden" id="deal-id" />
 
+            <div class="form-section-label">Parties</div>
             <div class="form-row">
               <div class="form-group">
                 <label for="brand">Brand *</label>
                 <input type="text" id="brand" required />
+                <span class="field-hint">e.g. Glossier</span>
               </div>
               <div class="form-group">
                 <label for="creator">Creator *</label>
                 <input type="text" id="creator" required />
+                <span class="field-hint">e.g. @beautybyjane</span>
               </div>
             </div>
 
+            <div class="form-section-label">Campaign</div>
             <div class="form-row">
               <div class="form-group">
                 <label for="platform">Platform</label>
@@ -138,17 +177,21 @@
               </div>
             </div>
 
+            <div class="form-section-label">Economics</div>
             <div class="form-row">
               <div class="form-group">
                 <label for="spend">Spend (USD)</label>
                 <input type="number" id="spend" min="0" step="1" />
+                <span class="field-hint">Total guaranteed fee</span>
               </div>
               <div class="form-group">
                 <label for="revenue">Revenue (USD)</label>
                 <input type="number" id="revenue" min="0" step="1" />
+                <span class="field-hint">Attributable or estimated</span>
               </div>
             </div>
 
+            <div class="form-section-label">Performance</div>
             <div class="form-row">
               <div class="form-group">
                 <label for="impressions">Impressions</label>
@@ -165,7 +208,7 @@
               <textarea
                 id="deliverables"
                 rows="3"
-                placeholder="e.g. 2x IG Reels, 3x Stories, 1x TikTok, usage for 6 months paid social..."
+                placeholder="e.g. 2x IG Reels, 3x Stories, 1x TikTok, 6 months paid social usage..."
               ></textarea>
             </div>
 
@@ -173,6 +216,9 @@
               <button type="submit" class="btn primary">Save deal</button>
               <button type="button" id="reset-deal-form" class="btn ghost">
                 Clear
+              </button>
+              <button type="button" id="delete-deal" class="btn ghost danger hidden">
+                Delete
               </button>
             </div>
           </form>
@@ -184,12 +230,15 @@
     <section id="contracts" class="section">
       <div class="section-header">
         <h1>Contract Builder</h1>
-        <p>Generate a structured contract from deal terms. No AI—just clean templates.</p>
+        <p>Lawyer-friendly, brand-safe templates you control.</p>
       </div>
 
       <div class="grid-2">
         <div class="card">
-          <h2>Inputs</h2>
+          <div class="card-header">
+            <h2>Inputs</h2>
+            <span class="card-caption">Fill in the key terms. Clauses are optional.</span>
+          </div>
           <form id="contract-form" class="form">
             <div class="form-group">
               <label for="c-brand">Brand / Advertiser *</label>
@@ -254,6 +303,22 @@
               ></textarea>
             </div>
 
+            <div class="form-section-label">Optional clauses</div>
+            <div class="clause-row">
+              <label class="checkbox">
+                <input type="checkbox" id="c-exclusivity" />
+                <span>Include exclusivity clause</span>
+              </label>
+              <label class="checkbox">
+                <input type="checkbox" id="c-morals" />
+                <span>Include morals clause</span>
+              </label>
+              <label class="checkbox">
+                <input type="checkbox" id="c-termination" />
+                <span>Include termination clause</span>
+              </label>
+            </div>
+
             <div class="form-actions">
               <button type="submit" class="btn primary">
                 Build contract
@@ -264,15 +329,18 @@
 
         <div class="card">
           <div class="card-header">
-            <h2>Contract Output</h2>
+            <div>
+              <h2>Contract Output</h2>
+              <span class="card-caption" id="contract-meta">Fill the form and build a contract.</span>
+            </div>
             <button id="contract-copy" class="btn ghost small">
-              Copy to clipboard
+              Copy
             </button>
           </div>
           <textarea
             id="contract-output"
             class="contract-output"
-            rows="22"
+            rows="24"
             readonly
           >Fill in the form on the left and click "Build contract" to generate a full contract.</textarea>
         </div>
@@ -288,13 +356,19 @@
 
       <div class="grid-3">
         <div class="card">
-          <h2>To do</h2>
+          <div class="card-header">
+            <h2>
+              To do
+              <span class="column-count" id="todo-count">• 0</span>
+            </h2>
+            <button id="todo-focus" class="btn small ghost">+</button>
+          </div>
           <ul id="todo-list" class="task-list"></ul>
           <form id="todo-form" class="form small">
             <input
               type="text"
               id="todo-input"
-              placeholder="Add a new task..."
+              placeholder="Add a new task…"
               required
             />
             <button type="submit" class="btn small primary">Add</button>
@@ -302,17 +376,27 @@
         </div>
 
         <div class="card">
-          <h2>In progress</h2>
+          <div class="card-header">
+            <h2>
+              In progress
+              <span class="column-count" id="inprogress-count">• 0</span>
+            </h2>
+          </div>
           <ul id="inprogress-list" class="task-list"></ul>
         </div>
 
         <div class="card">
-          <h2>Done</h2>
+          <div class="card-header">
+            <h2>
+              Done
+              <span class="column-count" id="done-count">• 0</span>
+            </h2>
+          </div>
           <ul id="done-list" class="task-list"></ul>
         </div>
       </div>
       <p class="hint">
-        Drag tasks between columns to update their status. Everything is saved locally in your browser.
+        Tip: Prefix tasks with a brand, e.g. <code>Nike: finalize brief</code> — we’ll show it as a tag.
       </p>
     </section>
   </main>
@@ -320,6 +404,8 @@
   <footer class="footer">
     Built for mid-sized creators, marketing teams, and agencies tired of spreadsheets.
   </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script src="main.js"></script>
 </body>
