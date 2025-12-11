@@ -1,223 +1,165 @@
-<!-- login.html -->
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>InfluenceFlow CRM — Login</title>
-
-  <!-- If you want to reuse your main CSS, keep this -->
-  <link rel="stylesheet" href="styles.css">
-
-  <style>
-    /* Minimal auth layout; you can tweak or move to styles.css later */
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #f3f4f6;
-      min-height: 100vh;
-      margin: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .auth-container {
-      width: 360px;
-      background: #fff;
-      padding: 28px 24px;
-      border-radius: 16px;
-      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.16);
-    }
-
-    .auth-brand {
-      font-weight: 600;
-      font-size: 20px;
-      margin-bottom: 4px;
-    }
-
-    .auth-subtitle {
-      font-size: 13px;
-      color: #6b7280;
-      margin-bottom: 20px;
-    }
-
-    .auth-title {
-      font-size: 18px;
-      font-weight: 500;
-      margin-bottom: 6px;
-    }
-
-    .auth-toggle-copy {
-      font-size: 13px;
-      color: #6b7280;
-      margin-bottom: 16px;
-    }
-
-    .auth-label {
-      font-size: 13px;
-      margin-bottom: 4px;
-      color: #374151;
-    }
-
-    .auth-input {
-      width: 100%;
-      padding: 10px 12px;
-      border-radius: 10px;
-      border: 1px solid #e5e7eb;
-      font-size: 14px;
-      outline: none;
-      margin-bottom: 10px;
-    }
-
-    .auth-input:focus {
-      border-color: #4f46e5;
-      box-shadow: 0 0 0 1px #4f46e5;
-    }
-
-    .auth-button {
-      width: 100%;
-      padding: 10px 12px;
-      border-radius: 999px;
-      border: none;
-      background: #4f46e5;
-      color: #fff;
-      font-weight: 500;
-      font-size: 14px;
-      cursor: pointer;
-      margin-top: 8px;
-    }
-
-    .auth-button:hover {
-      opacity: 0.95;
-    }
-
-    .auth-toggle {
-      margin-top: 12px;
-      text-align: center;
-      font-size: 13px;
-    }
-
-    .auth-toggle button {
-      border: none;
-      background: none;
-      color: #4f46e5;
-      font-weight: 500;
-      cursor: pointer;
-      padding: 0;
-    }
-
-    .auth-error {
-      color: #b91c1c;
-      font-size: 13px;
-      margin-top: 8px;
-      min-height: 16px;
-    }
-  </style>
-</head>
-<body>
-
-<div class="auth-container">
-  <div class="auth-brand">InfluenceFlow CRM</div>
-  <div class="auth-subtitle">Brand × creator deals, contracts & performance in one place.</div>
-
-  <div class="auth-title" id="form-title">Log in</div>
-  <div class="auth-toggle-copy" id="form-subcopy">
-    Use your email and password to access your dashboard.
-  </div>
-
-  <div id="name-field" style="display:none;">
-    <label class="auth-label" for="name">Full name</label>
-    <input class="auth-input" type="text" id="name" placeholder="e.g. Brand Manager, Creator, etc." />
-  </div>
-
-  <label class="auth-label" for="email">Email</label>
-  <input class="auth-input" type="email" id="email" placeholder="you@example.com" />
-
-  <label class="auth-label" for="password">Password</label>
-  <input class="auth-input" type="password" id="password" placeholder="••••••••" />
-
-  <button class="auth-button" id="auth-btn">Log in</button>
-  <div class="auth-error" id="error-msg"></div>
-
-  <div class="auth-toggle">
-    <span id="toggle-copy">Don’t have an account?</span>
-    <button id="toggle-auth" type="button">Sign up</button>
-  </div>
-</div>
-
-<script>
-  const API_BASE = "http://localhost:4000"; // your backend
-
-  let isSignup = false;
-
-  const toggleBtn = document.getElementById('toggle-auth');
-  const toggleCopy = document.getElementById('toggle-copy');
-  const nameField = document.getElementById('name-field');
-  const title = document.getElementById('form-title');
-  const subcopy = document.getElementById('form-subcopy');
-  const btn = document.getElementById('auth-btn');
-  const err = document.getElementById('error-msg');
-
-  toggleBtn.addEventListener('click', () => {
-    isSignup = !isSignup;
-
-    if (isSignup) {
-      nameField.style.display = "block";
-      title.textContent = "Create your account";
-      subcopy.textContent = "We’ll save your deals, contracts and invoices to this login.";
-      btn.textContent = "Sign up";
-      toggleCopy.textContent = "Already have an account?";
-      toggleBtn.textContent = "Log in";
-    } else {
-      nameField.style.display = "none";
-      title.textContent = "Log in";
-      subcopy.textContent = "Use your email and password to access your dashboard.";
-      btn.textContent = "Log in";
-      toggleCopy.textContent = "Don’t have an account?";
-      toggleBtn.textContent = "Sign up";
-    }
-  });
-
-  btn.addEventListener('click', async () => {
-    err.textContent = "";
-
-    const name = document.getElementById('name').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value.trim();
-
-    if (!email || !password || (isSignup && !name)) {
-      err.textContent = "Please fill in all required fields.";
-      return;
-    }
-
-    const endpoint = isSignup ? "/api/auth/register" : "/api/auth/login";
-
-    try {
-      const res = await fetch(API_BASE + endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password })
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        err.textContent = data.message || "Something went wrong.";
-        return;
+  <head>
+    <meta charset="UTF-8" />
+    <title>InfluenceFlow CRM — Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      .auth-layout {
+        max-width: 960px;
+        margin: 40px auto;
+        padding: 0 18px 40px;
+        display: grid;
+        gap: 18px;
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
       }
 
-      // Save JWT + user
-      localStorage.setItem("ifcrm_token", data.token);
-      localStorage.setItem("ifcrm_user", JSON.stringify(data.user));
+      @media (max-width: 900px) {
+        .auth-layout {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
 
-      // Go to dashboard
-      window.location.href = "index.html";
-    } catch (e) {
-      console.error(e);
-      err.textContent = "Could not reach the server.";
-    }
-  });
-</script>
+      .auth-hero-title {
+        font-size: 1.6rem;
+        margin-bottom: 8px;
+      }
 
-</body>
+      .auth-hero-text {
+        font-size: 0.95rem;
+        color: var(--text-muted);
+        margin: 0 0 10px;
+      }
+
+      .auth-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        font-size: 0.75rem;
+        color: var(--text);
+        margin-bottom: 10px;
+      }
+
+      .auth-footer-hint {
+        margin-top: 10px;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+      }
+
+      .auth-footer-hint code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          "Liberation Mono", "Courier New", monospace;
+        font-size: 0.78rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="logo">InfluenceFlow CRM</div>
+        <div class="tagline">
+          Brand × creator deals, contracts & performance in one place.
+        </div>
+      </div>
+      <div class="topbar-right">
+        <a href="index.html" class="btn small ghost">View demo without login</a>
+      </div>
+    </header>
+
+    <main class="auth-layout">
+      <!-- Left: marketing / copy -->
+      <section class="card">
+        <div class="auth-pill">Pipeline · Contracts · Workspace</div>
+        <h1 class="auth-hero-title">Log in to your campaign workspace</h1>
+        <p class="auth-hero-text">
+          Track creator deals, contracts, and live performance — all from a
+          single dashboard instead of scattered spreadsheets.
+        </p>
+        <ul class="auth-hero-text" style="padding-left: 18px;">
+          <li>Campaign pipeline: stages, spend, and ROI at a glance</li>
+          <li>Contract builder: usage rights, deliverables, and clauses</li>
+          <li>Shared workspace: drafts, reviews, and approvals</li>
+        </ul>
+        <p class="auth-hero-text">
+          Use this login as a simple prototype — accounts are stored locally in
+          your browser for now.
+        </p>
+      </section>
+
+      <!-- Right: auth form -->
+      <section class="card">
+        <div class="card-header">
+          <div class="card-header-main">
+            <h2>Log in</h2>
+          </div>
+          <p class="card-caption">Use your email and password to access CRM.</p>
+        </div>
+
+        <form id="login-form" class="form" autocomplete="on">
+          <div class="form-group">
+            <label for="full-name">Full name</label>
+            <input
+              id="full-name"
+              type="text"
+              placeholder="e.g. Sofia Taddeo-Goldstein"
+              autocomplete="name"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              autocomplete="email"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              placeholder="••••••••"
+              autocomplete="current-password"
+              required
+            />
+            <p class="field-hint">
+              For this prototype, passwords are stored in your browser only.
+            </p>
+          </div>
+
+          <p
+            id="login-error"
+            class="field-hint"
+            style="color: var(--danger); display: none;"
+          ></p>
+
+          <div class="form-actions">
+            <button type="submit" class="btn primary">Log in</button>
+            <button type="button" id="signup-button" class="btn ghost">
+              Create account
+            </button>
+          </div>
+        </form>
+
+        <p class="auth-footer-hint">
+          Or try the seeded demo account:
+          <code>demo@brand.com</code> / <code>demo123</code>.
+        </p>
+      </section>
+    </main>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="auth.js"></script>
+  </body>
 </html>
+
